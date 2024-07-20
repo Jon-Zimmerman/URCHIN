@@ -1,6 +1,10 @@
 package frc.robot;
 
 public class RobotMap {
+  public static class Gyro {
+    public static final int PIGEON_2_ID = 0;
+  }
+
   public static class FLModule {
     public static final int DRIVE_MOTOR_ID = 0;
     public static final int TURN_MOTOR_ID = 0;

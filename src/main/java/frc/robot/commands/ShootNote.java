@@ -10,16 +10,16 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 
-
 public class ShootNote extends SequentialCommandGroup {
   /** Creates a new ShootNote Command */
-  public ShootNote(double setPointRPMShooter, double setPointRPMIntake, Shooter shooter, Intake intake) {
+  public ShootNote(
+      double setPointRPMShooter, double setPointRPMIntake, Shooter shooter, Intake intake) {
 
     addCommands(
         new InstantCommand(() -> shooter.runVelocity(setPointRPMShooter), shooter),
-        new WaitCommand(1),
+        new WaitCommand(0.5),
         new InstantCommand(() -> intake.runVelocity(setPointRPMIntake)),
-        new WaitCommand(1),
+        new WaitCommand(0.5),
         new InstantCommand(shooter::stop, shooter),
         new InstantCommand(intake::stop, intake));
   }

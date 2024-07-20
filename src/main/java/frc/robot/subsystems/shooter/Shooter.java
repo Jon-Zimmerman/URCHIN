@@ -21,17 +21,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
-import frc.robot.Constants.NoteState;
-import frc.robot.subsystems.intake.DistanceSensorIO;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
   private final ShooterIO io;
-  private DistanceSensorIO dist;
   private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
-  private final DistanceSensorIOInputsAutoLogged distInputs =
-      new DistanceSensorIOInputsAutoLogged();
 
   private final SimpleMotorFeedforward ffModel;
   private final SysIdRoutine sysId;
@@ -39,7 +34,6 @@ public class Shooter extends SubsystemBase {
   /** Creates a new Shooter. */
   public Shooter(ShooterIO io) {
     this.io = io;
-    this.dist = dist;
     // Switch constants based on mode (the physics simulator is treated as a
     // separate robot with different tuning)
     switch (Constants.currentMode) {
@@ -72,8 +66,6 @@ public class Shooter extends SubsystemBase {
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Shooter", inputs);
-    dist.updateInputs(distInputs);
-    Logger.processInputs("Distance Sensor", distInputs);
   }
 
   /** Run open loop at the specified voltage. */
@@ -89,7 +81,7 @@ public class Shooter extends SubsystemBase {
     // Log shooter setpoint
     Logger.recordOutput("Shooter/SetpointRPM", velocityRPM);
   }
-   
+
   /** Stops the shooter. */
   public void stop() {
     io.stop();
@@ -114,13 +106,5 @@ public class Shooter extends SubsystemBase {
   /** Returns the current velocity in radians per second. */
   public double getCharacterizationVelocity() {
     return inputs.velocityRadPerSec;
-  }
-
-  public NoteState seesNote() {
-    if (distInputs.distance > Constants.SENSOR_THRESHOLD) {
-      return Constants.NoteState.NOTE;
-    } else {
-      return Constants.NoteState.NO_NOTE;
-    }
   }
 }

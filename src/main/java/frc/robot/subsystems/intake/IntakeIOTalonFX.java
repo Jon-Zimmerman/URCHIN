@@ -17,7 +17,6 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
@@ -43,17 +42,14 @@ public class IntakeIOTalonFX implements IntakeIO {
     config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     rollerMotor.getConfigurator().apply(config);
 
-
     BaseStatusSignal.setUpdateFrequencyForAll(
         50.0, motorPosition, motorVelocity, motorAppliedVolts, motorCurrent);
     rollerMotor.optimizeBusUtilization();
-
   }
 
   @Override
   public void updateInputs(IntakeIOInputs inputs) {
-    BaseStatusSignal.refreshAll(
-        motorPosition, motorVelocity, motorAppliedVolts, motorCurrent);
+    BaseStatusSignal.refreshAll(motorPosition, motorVelocity, motorAppliedVolts, motorCurrent);
     inputs.positionRad = Units.rotationsToRadians(motorPosition.getValueAsDouble()) / GEAR_RATIO;
     inputs.velocityRadPerSec =
         Units.rotationsToRadians(motorVelocity.getValueAsDouble()) / GEAR_RATIO;
@@ -79,10 +75,14 @@ public class IntakeIOTalonFX implements IntakeIO {
             false,
             false));
   }
+
   @Override
-  public void rollBack(){
-    rollerMotor.setControl(new PositionVoltage(motorPosition.getValueAsDouble()-Constants.INTAKE_ROLLBACK_ROTATIONS));
+  public void rollBack() {
+    rollerMotor.setControl(
+        new PositionVoltage(
+            motorPosition.getValueAsDouble() - Constants.INTAKE_ROLLBACK_ROTATIONS));
   }
+
   @Override
   public void stop() {
     rollerMotor.stopMotor();

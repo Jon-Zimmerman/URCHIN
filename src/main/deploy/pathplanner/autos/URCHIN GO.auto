@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 2.0,
-      "y": 7.0
+      "x": 0.6326972216763436,
+      "y": 4.658258278271581
     },
-    "rotation": 180.0
+    "rotation": -56.58341860468697
   },
   "command": {
     "type": "sequential",
@@ -18,9 +18,21 @@
           }
         },
         {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
           "type": "path",
           "data": {
-            "pathName": "Example Path"
+            "pathName": "Pick A"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Return With A"
           }
         }
       ]

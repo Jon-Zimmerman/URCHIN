@@ -13,6 +13,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 
 /**
@@ -26,12 +27,31 @@ import edu.wpi.first.math.util.Units;
 public final class Constants {
   public static final Mode currentMode = Mode.SIM;
 
+  // Swerve constants
   public static final double MAX_LINEAR_SPEED = Units.feetToMeters(14.5);
   public static final double TRACK_WIDTH_X = Units.inchesToMeters(10.0);
   public static final double TRACK_WIDTH_Y = Units.inchesToMeters(10.0);
   public static final double DRIVE_BASE_RADIUS =
       Math.hypot(TRACK_WIDTH_X / 2.0, TRACK_WIDTH_Y / 2.0);
   public static final double MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / DRIVE_BASE_RADIUS;
+  public static final double WHEEL_RADIUS = Units.inchesToMeters(2.0);
+
+  // Gear ratios for SDS MK4i L2, adjust as necessary
+  public static final double DRIVE_GEAR_RATIO = (50.0 / 14.0) * (17.0 / 27.0) * (45.0 / 15.0);
+  public static final double TURN_GEAR_RATIO = 150.0 / 7.0;
+
+  public static final double ODOM_MED_FREQ = 100.0;
+  public static final double ODOM_HIGH_FREQ = 250.0;
+  // Sensor and intake constants
+  public static final double SENSOR_THRESHOLD = 0;
+  public static final double INTAKE_ROLLBACK_ROTATIONS = 3;
+  public static final boolean isTurnMotorInverted = true;
+  public static final boolean isDriveMotorInverted = true;
+
+  public static final Rotation2d FLAbsoluteEncoderOffset = new Rotation2d(0.0);
+  public static final Rotation2d FRAbsoluteEncoderOffset = new Rotation2d(0.0);
+  public static final Rotation2d BLAbsoluteEncoderOffset = new Rotation2d(0.0);
+  public static final Rotation2d BRAbsoluteEncoderOffset = new Rotation2d(0.0);
 
   public static enum NoteState {
     Init,
@@ -39,8 +59,6 @@ public final class Constants {
     NOTE
   }
 
-  public static final double SENSOR_THRESHOLD = 0;
-  public static final double INTAKE_ROLLBACK_ROTATIONS = 3; 
   public static enum Mode {
     /** Running on a real robot. */
     REAL,

@@ -32,7 +32,6 @@ public interface IntakeIO {
 
   /** Run closed loop at the specified velocity. */
   public default void setVelocitySetPoint(double velocityRadPerSec, double ffVolts) {}
-  
 
   public default void setPositionSetpoint(double deltaRotations) {}
 

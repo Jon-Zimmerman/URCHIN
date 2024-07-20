@@ -17,13 +17,15 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.IntakeNote;
 import frc.robot.commands.ShootNote;
@@ -37,6 +39,7 @@ import frc.robot.subsystems.intake.DistanceSensorIO;
 import frc.robot.subsystems.intake.DistanceSensorIOAnalog;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIO;
+import frc.robot.subsystems.intake.IntakeIOSim;
 import frc.robot.subsystems.intake.IntakeIOTalonFX;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIO;
@@ -58,7 +61,7 @@ public class RobotContainer {
   private final Intake intake;
 
   // Controller
-  private final CommandXboxController controller = new CommandXboxController(0);
+  private final CommandXboxController driverController = new CommandXboxController(0);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -66,9 +69,9 @@ public class RobotContainer {
       new LoggedDashboardNumber("Shooter Speed RPM", 500.0);
   private final LoggedDashboardNumber intakeSpeedInput =
       new LoggedDashboardNumber("Intake Speed RPM", 500.0);
-
-private final LoggedDashboardNumber intakeToShooterFeedSpeedInput =
+  private final LoggedDashboardNumber intakeToShooterFeedSpeedInput =
       new LoggedDashboardNumber("Intake Feed to Shooter Speed RPM", 500.0);
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.currentMode) {
@@ -95,7 +98,7 @@ private final LoggedDashboardNumber intakeToShooterFeedSpeedInput =
                 new ModuleIOSim(),
                 new ModuleIOSim());
         shooter = new Shooter(new ShooterIOSim());
-        intake = new Intake(new IntakeIO() {}, new DistanceSensorIO() {});
+        intake = new Intake(new IntakeIOSim(), new DistanceSensorIO() {});
         break;
 
       default:
@@ -113,34 +116,42 @@ private final LoggedDashboardNumber intakeToShooterFeedSpeedInput =
     }
 
     // Set up auto routines
+
     NamedCommands.registerCommand(
-        "Run Shooter",
+        "IntakeNote",
+        new IntakeNote(intakeSpeedInput.get(), intake).finallyDo(intake::stop).withTimeout(3.0));
+
+    NamedCommands.registerCommand(
+        "Shoot Note",
         Commands.startEnd(
                 () -> shooter.runVelocity(shooterSpeedInput.get()), shooter::stop, shooter)
             .withTimeout(5.0));
+
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
     // Set up SysId routines
-    autoChooser.addOption(
-        "Drive SysId (Quasistatic Forward)",
-        drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Drive SysId (Quasistatic Reverse)",
-        drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Shooter SysId (Quasistatic Forward)",
-        shooter.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Shooter SysId (Quasistatic Reverse)",
-        shooter.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Shooter SysId (Dynamic Forward)", shooter.sysIdDynamic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Shooter SysId (Dynamic Reverse)", shooter.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    // autoChooser.addOption(
+    //     "Drive SysId (Quasistatic Forward)",
+    //     drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+    // autoChooser.addOption(
+    //     "Drive SysId (Quasistatic Reverse)",
+    //     drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+    // autoChooser.addOption(
+    //     "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
+    // autoChooser.addOption(
+    //     "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    // autoChooser.addOption(
+    //     "Shooter SysId (Quasistatic Forward)",
+    //     shooter.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+    // autoChooser.addOption(
+    //     "Shooter SysId (Quasistatic Reverse)",
+    //     shooter.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+    // autoChooser.addOption(
+    //     "Shooter SysId (Dynamic Forward)",
+    // shooter.sysIdDynamic(SysIdRoutine.Direction.kForward));
+    // autoChooser.addOption(
+    //     "Shooter SysId (Dynamic Reverse)",
+    // shooter.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
     // Configure the button bindings
     configureButtonBindings();
@@ -156,27 +167,34 @@ private final LoggedDashboardNumber intakeToShooterFeedSpeedInput =
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
-    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
-    controller
+            () -> -driverController.getLeftY(),
+            () -> -driverController.getLeftX(),
+            () -> -driverController.getRightX()));
+    driverController.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    driverController
         .b()
         .onTrue(
             Commands.runOnce(
                     () ->
                         drive.setPose(
-                            new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
+                            new Pose2d(
+                                drive.getPose().getTranslation(),
+                                DriverStation.getAlliance().get() == Alliance.Blue
+                                    ? new Rotation2d()
+                                    : Rotation2d.fromDegrees(180))),
                     drive)
                 .ignoringDisable(true));
-    controller
+    driverController
         .y()
         .whileTrue(
-            new ShootNote(shooterSpeedInput.get(), intakeToShooterFeedSpeedInput.get(), shooter, intake));
-    controller
-        .rightBumper()
-        .whileTrue(
-                new IntakeNote(intakeSpeedInput.get(),intake).finallyDo(intake::stop));
+            new ShootNote(
+                shooterSpeedInput.get(), intakeToShooterFeedSpeedInput.get(), shooter, intake));
+    driverController
+        .y()
+        .onFalse(new SequentialCommandGroup(new InstantCommand(shooter::stop),new InstantCommand(intake::stop)));     
+    driverController
+        .leftBumper()
+        .whileTrue(new IntakeNote(intakeSpeedInput.get(), intake).finallyDo(intake::stop));
   }
 
   /**

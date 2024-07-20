@@ -4,15 +4,13 @@
 
 package frc.robot.commands;
 
-
-
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants.NoteState;
 import frc.robot.subsystems.intake.Intake;
 
 public class IntakeNote extends Command {
   /** Creates a new IntakeNote. */
   private final Intake intake;
+
   private double setpoint;
 
   public IntakeNote(double setpoint, Intake intake) {
@@ -30,8 +28,7 @@ public class IntakeNote extends Command {
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {
-  }
+  public void execute() {}
 
   // Called once the command ends or is interrupted.
   @Override

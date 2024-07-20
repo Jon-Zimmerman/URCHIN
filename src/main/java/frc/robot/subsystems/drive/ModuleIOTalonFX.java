@@ -25,6 +25,8 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import frc.robot.Constants;
+import frc.robot.RobotMap;
 import java.util.Queue;
 
 /**
@@ -60,37 +62,38 @@ public class ModuleIOTalonFX implements ModuleIO {
   private final StatusSignal<Double> turnCurrent;
 
   // Gear ratios for SDS MK4i L2, adjust as necessary
-  private final double DRIVE_GEAR_RATIO = (50.0 / 14.0) * (17.0 / 27.0) * (45.0 / 15.0);
-  private final double TURN_GEAR_RATIO = 150.0 / 7.0;
+  private final double DRIVE_GEAR_RATIO = Constants.DRIVE_GEAR_RATIO;
+  private final double TURN_GEAR_RATIO = Constants.TURN_GEAR_RATIO;
 
-  private final boolean isTurnMotorInverted = true;
+  private final boolean isTurnMotorInverted = Constants.isTurnMotorInverted;
+  private final boolean isDriveMotorInverted = Constants.isDriveMotorInverted;
   private final Rotation2d absoluteEncoderOffset;
 
   public ModuleIOTalonFX(int index) {
     switch (index) {
       case 0:
-        driveTalon = new TalonFX(0);
-        turnTalon = new TalonFX(1);
-        cancoder = new CANcoder(2);
-        absoluteEncoderOffset = new Rotation2d(0.0); // MUST BE CALIBRATED
+        driveTalon = new TalonFX(RobotMap.FLModule.DRIVE_MOTOR_ID);
+        turnTalon = new TalonFX(RobotMap.FRModule.TURN_MOTOR_ID);
+        cancoder = new CANcoder(1);
+        absoluteEncoderOffset = Constants.FLAbsoluteEncoderOffset;
         break;
       case 1:
         driveTalon = new TalonFX(3);
         turnTalon = new TalonFX(4);
         cancoder = new CANcoder(5);
-        absoluteEncoderOffset = new Rotation2d(0.0); // MUST BE CALIBRATED
+        absoluteEncoderOffset = Constants.FRAbsoluteEncoderOffset;
         break;
       case 2:
         driveTalon = new TalonFX(6);
         turnTalon = new TalonFX(7);
         cancoder = new CANcoder(8);
-        absoluteEncoderOffset = new Rotation2d(0.0); // MUST BE CALIBRATED
+        absoluteEncoderOffset = Constants.BLAbsoluteEncoderOffset;
         break;
       case 3:
         driveTalon = new TalonFX(9);
         turnTalon = new TalonFX(10);
         cancoder = new CANcoder(11);
-        absoluteEncoderOffset = new Rotation2d(0.0); // MUST BE CALIBRATED
+        absoluteEncoderOffset = Constants.BRAbsoluteEncoderOffset;
         break;
       default:
         throw new RuntimeException("Invalid module index");
@@ -200,7 +203,10 @@ public class ModuleIOTalonFX implements ModuleIO {
   @Override
   public void setDriveBrakeMode(boolean enable) {
     var config = new MotorOutputConfigs();
-    config.Inverted = InvertedValue.CounterClockwise_Positive;
+    config.Inverted =
+        isDriveMotorInverted
+            ? InvertedValue.Clockwise_Positive
+            : InvertedValue.CounterClockwise_Positive;
     config.NeutralMode = enable ? NeutralModeValue.Brake : NeutralModeValue.Coast;
     driveTalon.getConfigurator().apply(config);
   }

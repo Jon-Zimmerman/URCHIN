@@ -21,8 +21,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
-import frc.robot.Constants.NoteState;
-
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -31,7 +29,7 @@ public class Intake extends SubsystemBase {
   private DistanceSensorIO dist;
   private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
   private final DistanceSensorIOInputsAutoLogged distInputs =
-  new DistanceSensorIOInputsAutoLogged();
+      new DistanceSensorIOInputsAutoLogged();
 
   private final SimpleMotorFeedforward ffModel;
   private final SysIdRoutine sysId;
@@ -94,6 +92,7 @@ public class Intake extends SubsystemBase {
   public void stop() {
     io.stop();
   }
+
   public void rollBack() {
     io.rollBack();
   }
@@ -118,7 +117,7 @@ public class Intake extends SubsystemBase {
   public double getCharacterizationVelocity() {
     return inputs.velocityRadPerSec;
   }
-  
+
   public boolean seesNote() {
     if (distInputs.distance > Constants.SENSOR_THRESHOLD) {
       return true;

@@ -34,11 +34,7 @@ public class IntakeIOSim implements IntakeIO {
   public void updateInputs(IntakeIOInputs inputs) {
     if (closedLoop) {
       if (positionControl) {
-        appliedVolts =
-            MathUtil.clamp(
-                pid.calculate(positionRotations) + ffVolts,
-                -12.0,
-                12.0);
+        appliedVolts = MathUtil.clamp(pid.calculate(positionRotations) + ffVolts, -12.0, 12.0);
         sim.setInputVoltage(appliedVolts);
       } else {
         appliedVolts =
