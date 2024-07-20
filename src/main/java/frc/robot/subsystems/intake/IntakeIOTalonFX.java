@@ -11,66 +11,64 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 
-package frc.robot.subsystems.flywheel;
+package frc.robot.subsystems.intake;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.util.Units;
+import frc.robot.Constants;
 
-public class FlywheelIOTalonFX implements FlywheelIO {
+public class IntakeIOTalonFX implements IntakeIO {
   private static final double GEAR_RATIO = 1.5;
 
-  private final TalonFX leader = new TalonFX(0);
-  private final TalonFX follower = new TalonFX(1);
+  private final TalonFX rollerMotor = new TalonFX(0);
 
-  private final StatusSignal<Double> leaderPosition = leader.getPosition();
-  private final StatusSignal<Double> leaderVelocity = leader.getVelocity();
-  private final StatusSignal<Double> leaderAppliedVolts = leader.getMotorVoltage();
-  private final StatusSignal<Double> leaderCurrent = leader.getSupplyCurrent();
-  private final StatusSignal<Double> followerCurrent = follower.getSupplyCurrent();
+  private final StatusSignal<Double> motorPosition = rollerMotor.getPosition();
+  private final StatusSignal<Double> motorVelocity = rollerMotor.getVelocity();
+  private final StatusSignal<Double> motorAppliedVolts = rollerMotor.getMotorVoltage();
+  private final StatusSignal<Double> motorCurrent = rollerMotor.getSupplyCurrent();
 
-  public FlywheelIOTalonFX() {
+  public IntakeIOTalonFX() {
     var config = new TalonFXConfiguration();
     config.CurrentLimits.SupplyCurrentLimit = 30.0;
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
     config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-    leader.getConfigurator().apply(config);
-    follower.getConfigurator().apply(config);
-    follower.setControl(new Follower(leader.getDeviceID(), false));
+    rollerMotor.getConfigurator().apply(config);
+
 
     BaseStatusSignal.setUpdateFrequencyForAll(
-        50.0, leaderPosition, leaderVelocity, leaderAppliedVolts, leaderCurrent, followerCurrent);
-    leader.optimizeBusUtilization();
-    follower.optimizeBusUtilization();
+        50.0, motorPosition, motorVelocity, motorAppliedVolts, motorCurrent);
+    rollerMotor.optimizeBusUtilization();
+
   }
 
   @Override
-  public void updateInputs(FlywheelIOInputs inputs) {
+  public void updateInputs(IntakeIOInputs inputs) {
     BaseStatusSignal.refreshAll(
-        leaderPosition, leaderVelocity, leaderAppliedVolts, leaderCurrent, followerCurrent);
-    inputs.positionRad = Units.rotationsToRadians(leaderPosition.getValueAsDouble()) / GEAR_RATIO;
+        motorPosition, motorVelocity, motorAppliedVolts, motorCurrent);
+    inputs.positionRad = Units.rotationsToRadians(motorPosition.getValueAsDouble()) / GEAR_RATIO;
     inputs.velocityRadPerSec =
-        Units.rotationsToRadians(leaderVelocity.getValueAsDouble()) / GEAR_RATIO;
-    inputs.appliedVolts = leaderAppliedVolts.getValueAsDouble();
-    inputs.currentAmps =
-        new double[] {leaderCurrent.getValueAsDouble(), followerCurrent.getValueAsDouble()};
+        Units.rotationsToRadians(motorVelocity.getValueAsDouble()) / GEAR_RATIO;
+    inputs.appliedVolts = motorAppliedVolts.getValueAsDouble();
+    inputs.currentAmps = motorCurrent.getValueAsDouble();
   }
 
   @Override
   public void setVoltage(double volts) {
-    leader.setControl(new VoltageOut(volts));
+    rollerMotor.setControl(new VoltageOut(volts));
   }
 
   @Override
-  public void setVelocity(double velocityRadPerSec, double ffVolts) {
-    leader.setControl(
+  public void setVelocitySetPoint(double velocityRadPerSec, double ffVolts) {
+    rollerMotor.setControl(
         new VelocityVoltage(
             Units.radiansToRotations(velocityRadPerSec),
             0.0,
@@ -81,10 +79,13 @@ public class FlywheelIOTalonFX implements FlywheelIO {
             false,
             false));
   }
-
+  @Override
+  public void rollBack(){
+    rollerMotor.setControl(new PositionVoltage(motorPosition.getValueAsDouble()-Constants.INTAKE_ROLLBACK_ROTATIONS));
+  }
   @Override
   public void stop() {
-    leader.stopMotor();
+    rollerMotor.stopMotor();
   }
 
   @Override
@@ -93,6 +94,6 @@ public class FlywheelIOTalonFX implements FlywheelIO {
     config.kP = kP;
     config.kI = kI;
     config.kD = kD;
-    leader.getConfigurator().apply(config);
+    rollerMotor.getConfigurator().apply(config);
   }
 }

@@ -11,7 +11,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 
-package frc.robot.subsystems.flywheel;
+package frc.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.*;
 
@@ -21,19 +21,25 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
+import frc.robot.Constants.NoteState;
+
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-public class Flywheel extends SubsystemBase {
-  private final FlywheelIO io;
-  private final FlywheelIOInputsAutoLogged inputs = new FlywheelIOInputsAutoLogged();
+public class Intake extends SubsystemBase {
+  private final IntakeIO io;
+  private DistanceSensorIO dist;
+  private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
+  private final DistanceSensorIOInputsAutoLogged distInputs =
+  new DistanceSensorIOInputsAutoLogged();
+
   private final SimpleMotorFeedforward ffModel;
   private final SysIdRoutine sysId;
 
-  /** Creates a new Flywheel. */
-  public Flywheel(FlywheelIO io) {
+  /** Creates a new Intake. */
+  public Intake(IntakeIO io, DistanceSensorIO dist) {
     this.io = io;
-
+    this.dist = dist;
     // Switch constants based on mode (the physics simulator is treated as a
     // separate robot with different tuning)
     switch (Constants.currentMode) {
@@ -58,14 +64,16 @@ public class Flywheel extends SubsystemBase {
                 null,
                 null,
                 null,
-                (state) -> Logger.recordOutput("Flywheel/SysIdState", state.toString())),
+                (state) -> Logger.recordOutput("Intake/SysIdState", state.toString())),
             new SysIdRoutine.Mechanism((voltage) -> runVolts(voltage.in(Volts)), null, this));
   }
 
   @Override
   public void periodic() {
     io.updateInputs(inputs);
-    Logger.processInputs("Flywheel", inputs);
+    Logger.processInputs("Intake", inputs);
+    dist.updateInputs(distInputs);
+    Logger.processInputs("Distance Sensor", distInputs);
   }
 
   /** Run open loop at the specified voltage. */
@@ -76,15 +84,18 @@ public class Flywheel extends SubsystemBase {
   /** Run closed loop at the specified velocity. */
   public void runVelocity(double velocityRPM) {
     var velocityRadPerSec = Units.rotationsPerMinuteToRadiansPerSecond(velocityRPM);
-    io.setVelocity(velocityRadPerSec, ffModel.calculate(velocityRadPerSec));
+    io.setVelocitySetPoint(velocityRadPerSec, ffModel.calculate(velocityRadPerSec));
 
-    // Log flywheel setpoint
-    Logger.recordOutput("Flywheel/SetpointRPM", velocityRPM);
+    // Log shooter setpoint
+    Logger.recordOutput("Intake/SetpointRPM", velocityRPM);
   }
 
-  /** Stops the flywheel. */
+  /** Stops the shooter. */
   public void stop() {
     io.stop();
+  }
+  public void rollBack() {
+    io.rollBack();
   }
 
   /** Returns a command to run a quasistatic test in the specified direction. */
@@ -106,5 +117,13 @@ public class Flywheel extends SubsystemBase {
   /** Returns the current velocity in radians per second. */
   public double getCharacterizationVelocity() {
     return inputs.velocityRadPerSec;
+  }
+  
+  public boolean seesNote() {
+    if (distInputs.distance > Constants.SENSOR_THRESHOLD) {
+      return true;
+    } else {
+      return false;
+    }
   }
 }
