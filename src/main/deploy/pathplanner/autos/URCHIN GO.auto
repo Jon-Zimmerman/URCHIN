@@ -14,7 +14,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Run Shooter"
+            "name": "Shoot Note"
           }
         },
         {
@@ -33,6 +33,24 @@
           "type": "path",
           "data": {
             "pathName": "Return With A"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot Note"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Stop Shooter"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Stop Intake"
           }
         }
       ]

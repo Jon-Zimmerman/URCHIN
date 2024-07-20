@@ -118,14 +118,18 @@ public class RobotContainer {
     // Set up auto routines
 
     NamedCommands.registerCommand(
-        "IntakeNote",
+        "Intake Note",
         new IntakeNote(intakeSpeedInput.get(), intake).finallyDo(intake::stop).withTimeout(3.0));
 
     NamedCommands.registerCommand(
         "Shoot Note",
-        Commands.startEnd(
-                () -> shooter.runVelocity(shooterSpeedInput.get()), shooter::stop, shooter)
-            .withTimeout(5.0));
+        new ShootNote(shooterSpeedInput.get(), intakeToShooterFeedSpeedInput.get(), shooter, intake)
+            .withTimeout(1.5));
+
+    NamedCommands.registerCommand(
+        "Stop Shooter", new InstantCommand(shooter::stop).withTimeout(1.5));
+
+    NamedCommands.registerCommand("Stop Intake", new InstantCommand(intake::stop).withTimeout(1.5));
 
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
@@ -191,7 +195,9 @@ public class RobotContainer {
                 shooterSpeedInput.get(), intakeToShooterFeedSpeedInput.get(), shooter, intake));
     driverController
         .y()
-        .onFalse(new SequentialCommandGroup(new InstantCommand(shooter::stop),new InstantCommand(intake::stop)));     
+        .onFalse(
+            new SequentialCommandGroup(
+                new InstantCommand(shooter::stop), new InstantCommand(intake::stop)));
     driverController
         .leftBumper()
         .whileTrue(new IntakeNote(intakeSpeedInput.get(), intake).finallyDo(intake::stop));
