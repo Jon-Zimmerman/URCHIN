@@ -24,11 +24,12 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
+import frc.robot.RobotMap;
 
 public class IntakeIOTalonFX implements IntakeIO {
   private static final double GEAR_RATIO = 1.5;
 
-  private final TalonFX rollerMotor = new TalonFX(0);
+  private final TalonFX rollerMotor = new TalonFX(RobotMap.Intake.MOTOR_ID);
 
   private final StatusSignal<Double> motorPosition = rollerMotor.getPosition();
   private final StatusSignal<Double> motorVelocity = rollerMotor.getVelocity();

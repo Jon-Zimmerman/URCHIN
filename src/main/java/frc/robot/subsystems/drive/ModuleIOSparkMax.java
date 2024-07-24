@@ -21,8 +21,6 @@ import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.AnalogInput;
-import edu.wpi.first.wpilibj.RobotController;
 import frc.robot.Constants;
 import frc.robot.RobotMap;
 import java.util.OptionalDouble;
@@ -50,12 +48,12 @@ public class ModuleIOSparkMax implements ModuleIO {
 
   private final RelativeEncoder driveEncoder;
   private final RelativeEncoder turnRelativeEncoder;
-  private final AnalogInput turnAbsoluteEncoder;
+  // private final AnalogInput turnAbsoluteEncoder;
   private final Queue<Double> timestampQueue;
   private final Queue<Double> drivePositionQueue;
   private final Queue<Double> turnPositionQueue;
 
-  private final boolean isTurnMotorInverted = true;
+  private final boolean isTurnMotorInverted = false;
   private final Rotation2d absoluteEncoderOffset;
 
   public ModuleIOSparkMax(int index) {
@@ -63,33 +61,33 @@ public class ModuleIOSparkMax implements ModuleIO {
       case 0:
         driveSparkMax = new CANSparkMax(RobotMap.FLModule.DRIVE_MOTOR_ID, MotorType.kBrushless);
         turnSparkMax = new CANSparkMax(RobotMap.FLModule.TURN_MOTOR_ID, MotorType.kBrushless);
-        turnAbsoluteEncoder = new AnalogInput(RobotMap.FLModule.ENCODER_CHANNEL_ID);
+        // turnAbsoluteEncoder = new AnalogInput(RobotMap.FLModule.ENCODER_CHANNEL_ID);
         absoluteEncoderOffset = Constants.FLAbsoluteEncoderOffset;
         break;
       case 1:
         driveSparkMax = new CANSparkMax(RobotMap.FRModule.DRIVE_MOTOR_ID, MotorType.kBrushless);
         turnSparkMax = new CANSparkMax(RobotMap.FRModule.TURN_MOTOR_ID, MotorType.kBrushless);
-        turnAbsoluteEncoder = new AnalogInput(RobotMap.FRModule.ENCODER_CHANNEL_ID);
+        // turnAbsoluteEncoder = new AnalogInput(RobotMap.FRModule.ENCODER_CHANNEL_ID);
         absoluteEncoderOffset = Constants.FRAbsoluteEncoderOffset;
         break;
       case 2:
         driveSparkMax = new CANSparkMax(RobotMap.BLModule.DRIVE_MOTOR_ID, MotorType.kBrushless);
         turnSparkMax = new CANSparkMax(RobotMap.BLModule.TURN_MOTOR_ID, MotorType.kBrushless);
-        turnAbsoluteEncoder = new AnalogInput(RobotMap.BLModule.ENCODER_CHANNEL_ID);
+        // turnAbsoluteEncoder = new AnalogInput(RobotMap.BLModule.ENCODER_CHANNEL_ID);
         absoluteEncoderOffset = Constants.BLAbsoluteEncoderOffset;
         break;
       case 3:
         driveSparkMax = new CANSparkMax(RobotMap.BRModule.DRIVE_MOTOR_ID, MotorType.kBrushless);
         turnSparkMax = new CANSparkMax(RobotMap.BRModule.TURN_MOTOR_ID, MotorType.kBrushless);
-        turnAbsoluteEncoder = new AnalogInput(RobotMap.BRModule.ENCODER_CHANNEL_ID);
+        // turnAbsoluteEncoder = new AnalogInput(RobotMap.BRModule.ENCODER_CHANNEL_ID);
         absoluteEncoderOffset = Constants.BRAbsoluteEncoderOffset;
         break;
       default:
         throw new RuntimeException("Invalid module index");
     }
 
-    driveSparkMax.restoreFactoryDefaults();
-    turnSparkMax.restoreFactoryDefaults();
+    // aadriveSparkMax.restoreFactoryDefaults();
+    // turnSparkMax.restoreFactoryDefaults();
 
     driveSparkMax.setCANTimeout(250);
     turnSparkMax.setCANTimeout(250);
@@ -156,8 +154,7 @@ public class ModuleIOSparkMax implements ModuleIO {
     inputs.driveCurrentAmps = new double[] {driveSparkMax.getOutputCurrent()};
 
     inputs.turnAbsolutePosition =
-        new Rotation2d(
-                turnAbsoluteEncoder.getVoltage() / RobotController.getVoltage5V() * 2.0 * Math.PI)
+        Rotation2d.fromRotations(turnSparkMax.getAbsoluteEncoder().getPosition())
             .minus(absoluteEncoderOffset);
     inputs.turnPosition =
         Rotation2d.fromRotations(turnRelativeEncoder.getPosition() / TURN_GEAR_RATIO);

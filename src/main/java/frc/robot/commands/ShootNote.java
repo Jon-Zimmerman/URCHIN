@@ -17,9 +17,9 @@ public class ShootNote extends SequentialCommandGroup {
 
     addCommands(
         new InstantCommand(() -> shooter.runVelocity(setPointRPMShooter), shooter),
-        new WaitCommand(0.5),
+        new WaitCommand(2),
         new InstantCommand(() -> intake.runVelocity(setPointRPMIntake)),
-        new WaitCommand(0.5),
+        new WaitCommand(1),
         new InstantCommand(shooter::stop, shooter),
         new InstantCommand(intake::stop, intake));
   }

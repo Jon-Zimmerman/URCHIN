@@ -25,7 +25,7 @@ import edu.wpi.first.math.util.Units;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-  public static final Mode currentMode = Mode.SIM;
+  public static final Mode currentMode = Mode.REAL;
 
   // Swerve constants
   public static final double MAX_LINEAR_SPEED = Units.feetToMeters(14.5);
@@ -36,22 +36,21 @@ public final class Constants {
   public static final double MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / DRIVE_BASE_RADIUS;
   public static final double WHEEL_RADIUS = Units.inchesToMeters(2.0);
 
-  // Gear ratios for SDS MK4i L2, adjust as necessary
-  public static final double DRIVE_GEAR_RATIO = (50.0 / 14.0) * (17.0 / 27.0) * (45.0 / 15.0);
-  public static final double TURN_GEAR_RATIO = 150.0 / 7.0;
+  public static final double DRIVE_GEAR_RATIO = 4.71;
+  public static final double TURN_GEAR_RATIO = 9424. / 203.;
 
   public static final double ODOM_MED_FREQ = 100.0;
   public static final double ODOM_HIGH_FREQ = 250.0;
   // Sensor and intake constants
-  public static final double SENSOR_THRESHOLD = 0;
+  public static final double SENSOR_THRESHOLD = 20;
   public static final double INTAKE_ROLLBACK_ROTATIONS = 3;
   public static final boolean isTurnMotorInverted = true;
   public static final boolean isDriveMotorInverted = true;
 
-  public static final Rotation2d FLAbsoluteEncoderOffset = new Rotation2d(0.0);
-  public static final Rotation2d FRAbsoluteEncoderOffset = new Rotation2d(0.0);
-  public static final Rotation2d BLAbsoluteEncoderOffset = new Rotation2d(0.0);
-  public static final Rotation2d BRAbsoluteEncoderOffset = new Rotation2d(0.0);
+  public static final Rotation2d FLAbsoluteEncoderOffset = Rotation2d.fromDegrees(0);
+  public static final Rotation2d FRAbsoluteEncoderOffset = Rotation2d.fromDegrees(0);
+  public static final Rotation2d BLAbsoluteEncoderOffset = Rotation2d.fromDegrees(0);
+  public static final Rotation2d BRAbsoluteEncoderOffset = Rotation2d.fromDegrees(0);
 
   public static enum NoteState {
     Init,

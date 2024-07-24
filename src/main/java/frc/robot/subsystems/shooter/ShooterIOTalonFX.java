@@ -22,11 +22,12 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.util.Units;
+import frc.robot.RobotMap;
 
 public class ShooterIOTalonFX implements ShooterIO {
   private static final double GEAR_RATIO = 1.5;
 
-  private final TalonFX shooterMotor = new TalonFX(0);
+  private final TalonFX shooterMotor = new TalonFX(RobotMap.Shooter.MOTOR_ID);
 
   private final StatusSignal<Double> motorPosition = shooterMotor.getPosition();
   private final StatusSignal<Double> motorVelocity = shooterMotor.getVelocity();

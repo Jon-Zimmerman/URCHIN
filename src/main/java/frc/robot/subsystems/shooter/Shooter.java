@@ -39,8 +39,8 @@ public class Shooter extends SubsystemBase {
     switch (Constants.currentMode) {
       case REAL:
       case REPLAY:
-        ffModel = new SimpleMotorFeedforward(0.1, 0.05);
-        io.configurePID(1.0, 0.0, 0.0);
+        ffModel = new SimpleMotorFeedforward(0.01, 0.05);
+        io.configurePID(0.010, 0.0, 0.0);
         break;
       case SIM:
         ffModel = new SimpleMotorFeedforward(0.0, 0.03);
